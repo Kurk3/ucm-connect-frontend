@@ -1,0 +1,2822 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+      "title": "Student Materials API",
+      "description": "REST API for student study materials sharing platform",
+      "contact": {
+        "name": "UCM Connect Team",
+        "email": "support@ucm-connect.com"
+      },
+      "license": {
+        "name": "Apache 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+      },
+      "version": "1.0.0"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8080",
+        "description": "Generated server url"
+      }
+    ],
+    "security": [
+      {
+        "Bearer Authentication": []
+      }
+    ],
+    "tags": [
+      {
+        "name": "Authentication",
+        "description": "User authentication endpoints (register, login, email verification)"
+      },
+      {
+        "name": "Cache Management",
+        "description": "Endpoints for cache monitoring and management"
+      },
+      {
+        "name": "Test",
+        "description": "Test endpoints to verify security configuration"
+      },
+      {
+        "name": "Users",
+        "description": "User profile management endpoints"
+      },
+      {
+        "name": "Subjects",
+        "description": "Endpoints for managing study subjects/categories"
+      },
+      {
+        "name": "Comments",
+        "description": "Endpoints for managing comments on posts"
+      },
+      {
+        "name": "Posts",
+        "description": "Endpoints for managing study material posts"
+      },
+      {
+        "name": "Test Endpoints",
+        "description": "Test endpoints for JWT authentication validation"
+      },
+      {
+        "name": "Likes",
+        "description": "Endpoints for managing likes on posts and comments"
+      }
+    ],
+    "paths": {
+      "/api/v1/users/me": {
+        "get": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Get current user profile",
+          "description": "Get authenticated user's profile information. Requires valid JWT token.",
+          "operationId": "getCurrentUser",
+          "responses": {
+            "200": {
+              "description": "User profile retrieved successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserDTO"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Invalid or missing JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        },
+        "put": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Update current user profile",
+          "description": "Update authenticated user's profile information. Requires valid JWT token.",
+          "operationId": "updateCurrentUser",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "401": {
+              "description": "Unauthorized - Invalid or missing JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "User profile updated successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/UserDTO"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        },
+        "delete": {
+          "tags": [
+            "Users"
+          ],
+          "summary": "Delete current user account",
+          "description": "Permanently delete authenticated user's account from both Cognito and database. This also deletes all user's posts, comments, and likes. This action cannot be undone.",
+          "operationId": "deleteCurrentUser",
+          "responses": {
+            "401": {
+              "description": "Unauthorized - Invalid or missing JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "204": {
+              "description": "User account deleted successfully"
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        }
+      },
+      "/api/v1/subjects/{id}": {
+        "get": {
+          "tags": [
+            "Subjects"
+          ],
+          "summary": "Get subject by ID",
+          "description": "Retrieve a specific subject by its UUID",
+          "operationId": "getSubjectById",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "401": {
+              "description": "Unauthorized - Invalid JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Subject not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Successfully retrieved subject",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SubjectDTO"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        },
+        "put": {
+          "tags": [
+            "Subjects"
+          ],
+          "summary": "Update subject",
+          "description": "Update an existing subject by its UUID",
+          "operationId": "updateSubject",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Subject with this name already exists",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Subject updated successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SubjectDTO"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Invalid JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Subject not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        },
+        "delete": {
+          "tags": [
+            "Subjects"
+          ],
+          "summary": "Delete subject",
+          "description": "Delete a subject by its UUID",
+          "operationId": "deleteSubject",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "401": {
+              "description": "Unauthorized - Invalid JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Subject not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "204": {
+              "description": "Subject deleted successfully"
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        }
+      },
+      "/api/v1/posts/{id}": {
+        "get": {
+          "tags": [
+            "Posts"
+          ],
+          "summary": "Get post by ID",
+          "description": "Retrieve detailed information about a specific post with nested structure (author, subject, file, stats)",
+          "operationId": "getPostById",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Post UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Post not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDetailDTO"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Post found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDetailDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Posts"
+          ],
+          "summary": "Update post",
+          "description": "Update post title, description, or subject. File cannot be changed.",
+          "operationId": "updatePost",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Post UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Validation error",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Post or subject not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Not the post owner",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Post updated successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Posts"
+          ],
+          "summary": "Delete post",
+          "description": "Delete a post. Only the post owner can delete it.",
+          "operationId": "deletePost",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Post UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Post not found"
+            },
+            "403": {
+              "description": "Not the post owner"
+            },
+            "204": {
+              "description": "Post deleted successfully"
+            }
+          }
+        }
+      },
+      "/api/v1/comments/{id}": {
+        "get": {
+          "tags": [
+            "Comments"
+          ],
+          "summary": "Get comment by ID",
+          "description": "Retrieve detailed information about a specific comment with nested structure (author, stats)",
+          "operationId": "getCommentById",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Comment UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Comment not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDetailDTO"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Comment found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDetailDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "Comments"
+          ],
+          "summary": "Update comment",
+          "description": "Update comment content. Only the comment owner can update it.",
+          "operationId": "updateComment",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Comment UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Validation error",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Not the comment owner",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Comment not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Comment updated successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Comments"
+          ],
+          "summary": "Delete comment",
+          "description": "Delete a comment. Only the comment owner can delete it.",
+          "operationId": "deleteComment",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "description": "Comment UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "403": {
+              "description": "Not the comment owner"
+            },
+            "204": {
+              "description": "Comment deleted successfully"
+            },
+            "404": {
+              "description": "Comment not found"
+            }
+          }
+        }
+      },
+      "/api/v1/test/seed": {
+        "get": {
+          "tags": [
+            "data-seed-controller"
+          ],
+          "operationId": "getSeedStatus",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "data-seed-controller"
+          ],
+          "operationId": "seedData",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "data-seed-controller"
+          ],
+          "operationId": "cleanupData",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/subjects": {
+        "get": {
+          "tags": [
+            "Subjects"
+          ],
+          "summary": "Get all subjects",
+          "description": "Retrieve a list of all available study subjects/categories",
+          "operationId": "getAllSubjects",
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved subjects",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SubjectListResponse"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Invalid JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "Subjects"
+          ],
+          "summary": "Create new subject",
+          "description": "Create a new study subject/category",
+          "operationId": "createSubject",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubjectDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "409": {
+              "description": "Subject with this name already exists",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Subject created successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/SubjectDTO"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Invalid JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        }
+      },
+      "/api/v1/posts": {
+        "get": {
+          "tags": [
+            "Posts"
+          ],
+          "summary": "Get all posts",
+          "description": "Retrieve paginated list of posts with optional filtering by subject or user",
+          "operationId": "getAllPosts",
+          "parameters": [
+            {
+              "name": "page",
+              "in": "query",
+              "description": "Page number (default: 1)",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Items per page (default: 20, max: 100)",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 20
+              }
+            },
+            {
+              "name": "subjectId",
+              "in": "query",
+              "description": "Filter by subject ID (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "userId",
+              "in": "query",
+              "description": "Filter by user ID (optional)",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved posts",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostListResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid parameters",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostListResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Posts"
+          ],
+          "summary": "Create new post",
+          "description": "Create a new post with mock file values (real file upload coming later)",
+          "operationId": "createPost",
+          "parameters": [
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Validation error",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Subject or user not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Post created successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PostDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/posts/{postId}/likes": {
+        "post": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Like a post",
+          "description": "Add a like to a post",
+          "operationId": "likePost",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "description": "Post UUID to like",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Post or user not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Post liked successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "Already liked this post",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Unlike a post",
+          "description": "Remove a like from a post",
+          "operationId": "unlikePost",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "description": "Post UUID to unlike",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Post not found or not liked"
+            },
+            "204": {
+              "description": "Like removed successfully"
+            }
+          }
+        }
+      },
+      "/api/v1/posts/{postId}/files": {
+        "get": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "getPostFiles",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/FileDTO"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "uploadFile",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "required": [
+                    "file"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/FileUploadResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/posts/{postId}/comments": {
+        "get": {
+          "tags": [
+            "Comments"
+          ],
+          "summary": "Get all comments for a post",
+          "description": "Retrieve paginated list of comments for a specific post",
+          "operationId": "getCommentsByPostId",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "description": "Post UUID",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "page",
+              "in": "query",
+              "description": "Page number (default: 1)",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 1
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "description": "Items per page (default: 50, max: 100)",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "format": "int32",
+                "default": 50
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Post not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentListResponse"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Successfully retrieved comments",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentListResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "Comments"
+          ],
+          "summary": "Create new comment",
+          "description": "Add a comment to a post",
+          "operationId": "createComment",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "description": "Post UUID to comment on",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDTO"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "404": {
+              "description": "Post or user not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Validation error",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Comment created successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CommentDTO"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/comments/{commentId}/likes": {
+        "post": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Like a comment",
+          "description": "Add a like to a comment",
+          "operationId": "likeComment",
+          "parameters": [
+            {
+              "name": "commentId",
+              "in": "path",
+              "description": "Comment UUID to like",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "409": {
+              "description": "Already liked this comment",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            },
+            "201": {
+              "description": "Comment liked successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "Comment or user not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/LikeDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Unlike a comment",
+          "description": "Remove a like from a comment",
+          "operationId": "unlikeComment",
+          "parameters": [
+            {
+              "name": "commentId",
+              "in": "path",
+              "description": "Comment UUID to unlike",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            },
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Like removed successfully"
+            },
+            "404": {
+              "description": "Comment not found or not liked"
+            }
+          }
+        }
+      },
+      "/api/v1/cache/clear": {
+        "post": {
+          "tags": [
+            "Cache Management"
+          ],
+          "summary": "Clear all caches",
+          "description": "Clears all configured caches in the application",
+          "operationId": "clearAllCaches",
+          "responses": {
+            "200": {
+              "description": "All caches cleared successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/cache/clear/{cacheName}": {
+        "post": {
+          "tags": [
+            "Cache Management"
+          ],
+          "summary": "Clear specific cache",
+          "description": "Clears a specific cache by name",
+          "operationId": "clearCache",
+          "parameters": [
+            {
+              "name": "cacheName",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "404": {
+              "description": "Cache not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Cache cleared successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/auth/verify-email": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "Verify email address",
+          "description": "Confirm user email with verification code sent via email",
+          "operationId": "verifyEmail",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyEmailRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "400": {
+              "description": "Invalid verification code",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "200": {
+              "description": "Email verified successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/auth/register": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "Register new user",
+          "description": "Create a new user account in AWS Cognito. User will receive email verification code.",
+          "operationId": "register",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "201": {
+              "description": "User registered successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Invalid input data",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            },
+            "409": {
+              "description": "User already exists",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/auth/login": {
+        "post": {
+          "tags": [
+            "Authentication"
+          ],
+          "summary": "User login",
+          "description": "Authenticate user and receive JWT tokens",
+          "operationId": "login",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Login successful",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AuthResponse"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid credentials or email not verified",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/users/me/likes": {
+        "get": {
+          "tags": [
+            "Likes"
+          ],
+          "summary": "Get current user's likes",
+          "description": "Retrieve all posts and comments liked by the current user",
+          "operationId": "getUserLikes",
+          "parameters": [
+            {
+              "name": "X-User-Id",
+              "in": "header",
+              "description": "Current user ID (mock auth via header)",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved likes",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/LikeDTO"
+                    }
+                  }
+                }
+              }
+            },
+            "404": {
+              "description": "User not found",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/LikeDTO"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/test/public": {
+        "get": {
+          "tags": [
+            "Test Endpoints"
+          ],
+          "summary": "Public test endpoint",
+          "description": "Test endpoint accessible without authentication. Anyone can access this.",
+          "operationId": "publicEndpoint",
+          "responses": {
+            "200": {
+              "description": "Success",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/test/protected": {
+        "get": {
+          "tags": [
+            "Test Endpoints"
+          ],
+          "summary": "Protected test endpoint",
+          "description": "Test endpoint that requires JWT authentication. Use this to verify your JWT token works correctly.",
+          "operationId": "protectedEndpoint",
+          "responses": {
+            "200": {
+              "description": "Authentication successful",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Unauthorized - Invalid or missing JWT token",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ErrorResponse"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        }
+      },
+      "/api/v1/protected": {
+        "get": {
+          "tags": [
+            "Test"
+          ],
+          "summary": "Protected endpoint",
+          "description": "This endpoint requires JWT authentication",
+          "operationId": "protectedEndpoint_1",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "Bearer Authentication": []
+            }
+          ]
+        }
+      },
+      "/api/v1/posts/{postId}/files/count": {
+        "get": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "getFileCount",
+          "parameters": [
+            {
+              "name": "postId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/hello": {
+        "get": {
+          "tags": [
+            "Test"
+          ],
+          "summary": "Public endpoint",
+          "description": "This endpoint is publicly accessible without authentication",
+          "operationId": "hello",
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/files/{fileId}": {
+        "get": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "getFile",
+          "parameters": [
+            {
+              "name": "fileId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/FileDTO"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "deleteFile",
+          "parameters": [
+            {
+              "name": "fileId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK"
+            }
+          }
+        }
+      },
+      "/api/v1/files/{fileId}/download": {
+        "get": {
+          "tags": [
+            "file-controller"
+          ],
+          "operationId": "getDownloadUrl",
+          "parameters": [
+            {
+              "name": "fileId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "OK",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "$ref": "#/components/schemas/FileDownloadResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/cache/stats": {
+        "get": {
+          "tags": [
+            "Cache Management"
+          ],
+          "summary": "Get cache statistics",
+          "description": "Returns statistics for all configured caches including hit/miss ratios",
+          "operationId": "getCacheStats",
+          "responses": {
+            "200": {
+              "description": "Cache statistics retrieved successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/v1/cache/names": {
+        "get": {
+          "tags": [
+            "Cache Management"
+          ],
+          "summary": "Get cache names",
+          "description": "Returns list of all configured cache names",
+          "operationId": "getCacheNames",
+          "responses": {
+            "200": {
+              "description": "Cache names retrieved successfully",
+              "content": {
+                "*/*": {
+                  "schema": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "UpdateUserRequest": {
+          "required": [
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "name": {
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string",
+              "description": "User full name",
+              "example": "Adam Kurek Updated"
+            }
+          },
+          "description": "Update user profile request"
+        },
+        "ErrorResponse": {
+          "type": "object",
+          "properties": {
+            "error": {
+              "type": "string",
+              "description": "Error type",
+              "example": "ValidationError"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error message",
+              "example": "Invalid email format"
+            },
+            "timestamp": {
+              "type": "string",
+              "description": "Timestamp when error occurred",
+              "format": "date-time"
+            },
+            "status": {
+              "type": "integer",
+              "description": "HTTP status code",
+              "format": "int32",
+              "example": 400
+            },
+            "path": {
+              "type": "string",
+              "description": "Request path",
+              "example": "/api/v1/subjects"
+            },
+            "details": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "description": "Validation details (optional)"
+              },
+              "description": "Validation details (optional)"
+            }
+          },
+          "description": "Error response"
+        },
+        "UserDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "User UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "name": {
+              "type": "string",
+              "description": "User name",
+              "example": "Adam Kurek"
+            },
+            "nickName": {
+              "type": "string",
+              "description": "User nickname",
+              "example": "adam.kurek"
+            },
+            "email": {
+              "type": "string",
+              "description": "User email",
+              "example": "kurekadam314@gmail.com"
+            },
+            "cognitoUserId": {
+              "type": "string",
+              "description": "Cognito user ID (sub claim)",
+              "example": "a1b2c3d4-5678-90ab-cdef-1234567890ab"
+            },
+            "emailVerified": {
+              "type": "boolean",
+              "description": "Email verification status",
+              "example": true
+            },
+            "twoFactorEnabled": {
+              "type": "boolean",
+              "description": "Two-factor authentication enabled",
+              "example": false
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Account creation timestamp",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time"
+            }
+          },
+          "description": "User profile information"
+        },
+        "SubjectDTO": {
+          "required": [
+            "name"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Subject UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "name": {
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string",
+              "description": "Subject name",
+              "example": "Computer Science"
+            },
+            "description": {
+              "maxLength": 500,
+              "minLength": 0,
+              "type": "string",
+              "description": "Subject description",
+              "example": "All courses related to computer science and programming"
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time"
+            }
+          },
+          "description": "Subject details"
+        },
+        "PostDTO": {
+          "required": [
+            "title"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Post UUID (ignored in requests, generated by server)",
+              "format": "uuid",
+              "readOnly": true,
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "title": {
+              "maxLength": 255,
+              "minLength": 3,
+              "type": "string",
+              "description": "Post title",
+              "example": "Data Structures Cheat Sheet"
+            },
+            "description": {
+              "maxLength": 2000,
+              "minLength": 0,
+              "type": "string",
+              "description": "Post description",
+              "example": "Complete guide to trees and graphs"
+            },
+            "userId": {
+              "type": "string",
+              "description": "User ID who created the post (comes from auth header)",
+              "format": "uuid",
+              "readOnly": true
+            },
+            "userName": {
+              "type": "string",
+              "description": "Username of post creator",
+              "readOnly": true,
+              "example": "Adam"
+            },
+            "subjectId": {
+              "type": "string",
+              "description": "Subject ID (optional)",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "subjectName": {
+              "type": "string",
+              "description": "Subject name",
+              "readOnly": true,
+              "example": "Computer Science"
+            },
+            "fileType": {
+              "type": "string",
+              "description": "File type",
+              "readOnly": true,
+              "example": "pdf",
+              "enum": [
+                "pdf",
+                "image",
+                "zip"
+              ]
+            },
+            "fileUrl": {
+              "type": "string",
+              "description": "File URL/path",
+              "readOnly": true,
+              "example": "mock-file.pdf"
+            },
+            "fileSize": {
+              "type": "integer",
+              "description": "File size in bytes",
+              "format": "int64",
+              "readOnly": true,
+              "example": 0
+            },
+            "numberOfLikes": {
+              "type": "integer",
+              "description": "Number of likes",
+              "format": "int32",
+              "readOnly": true,
+              "example": 0
+            },
+            "numberOfComments": {
+              "type": "integer",
+              "description": "Number of comments",
+              "format": "int32",
+              "readOnly": true,
+              "example": 0
+            },
+            "isPublished": {
+              "type": "boolean",
+              "description": "Is post published",
+              "readOnly": true,
+              "example": true
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time",
+              "readOnly": true
+            }
+          },
+          "description": "Post details"
+        },
+        "CommentDTO": {
+          "required": [
+            "content"
+          ],
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Comment UUID (ignored in requests)",
+              "format": "uuid",
+              "readOnly": true,
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "postId": {
+              "type": "string",
+              "description": "Post ID this comment belongs to (comes from URL)",
+              "format": "uuid",
+              "readOnly": true,
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "userId": {
+              "type": "string",
+              "description": "User ID who created the comment (comes from auth header)",
+              "format": "uuid",
+              "readOnly": true
+            },
+            "userName": {
+              "type": "string",
+              "description": "Username of comment creator",
+              "readOnly": true,
+              "example": "Adam"
+            },
+            "content": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "type": "string",
+              "description": "Comment content",
+              "example": "Great study material!"
+            },
+            "numberOfLikes": {
+              "type": "integer",
+              "description": "Number of likes",
+              "format": "int32",
+              "readOnly": true,
+              "example": 0
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time",
+              "readOnly": true
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time",
+              "readOnly": true
+            }
+          },
+          "description": "Comment details"
+        },
+        "LikeDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Like UUID",
+              "format": "uuid",
+              "readOnly": true,
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "userId": {
+              "type": "string",
+              "description": "User ID who liked (comes from auth header)",
+              "format": "uuid",
+              "readOnly": true
+            },
+            "postId": {
+              "type": "string",
+              "description": "Post ID (if like is on a post, comes from URL)",
+              "format": "uuid",
+              "readOnly": true
+            },
+            "commentId": {
+              "type": "string",
+              "description": "Comment ID (if like is on a comment, comes from URL)",
+              "format": "uuid",
+              "readOnly": true
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time",
+              "readOnly": true
+            }
+          },
+          "description": "Like details"
+        },
+        "FileUploadResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "postId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "fileName": {
+              "type": "string"
+            },
+            "fileType": {
+              "type": "string",
+              "enum": [
+                "PDF",
+                "IMAGE",
+                "ZIP"
+              ]
+            },
+            "fileSize": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "message": {
+              "type": "string"
+            }
+          }
+        },
+        "VerifyEmailRequest": {
+          "required": [
+            "email",
+            "verificationCode"
+          ],
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "User email address",
+              "example": "student@ucm.sk"
+            },
+            "verificationCode": {
+              "type": "string",
+              "description": "Verification code received via email",
+              "example": "123456"
+            }
+          },
+          "description": "Email verification request"
+        },
+        "RegisterRequest": {
+          "required": [
+            "email",
+            "name",
+            "nickName",
+            "password"
+          ],
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "User email address",
+              "example": "student@ucm.sk"
+            },
+            "password": {
+              "maxLength": 2147483647,
+              "minLength": 8,
+              "type": "string",
+              "description": "User password (min 8 characters)",
+              "example": "Test1234!"
+            },
+            "name": {
+              "maxLength": 100,
+              "minLength": 2,
+              "type": "string",
+              "description": "User full name",
+              "example": "Adam Kurek"
+            },
+            "nickName": {
+              "maxLength": 50,
+              "minLength": 2,
+              "type": "string",
+              "description": "User nickname (used for login)",
+              "example": "adam.kurek"
+            }
+          },
+          "description": "User registration request"
+        },
+        "LoginRequest": {
+          "required": [
+            "email",
+            "password"
+          ],
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string",
+              "description": "User email address",
+              "example": "student@ucm.sk"
+            },
+            "password": {
+              "type": "string",
+              "description": "User password",
+              "example": "Test1234!"
+            }
+          },
+          "description": "User login request"
+        },
+        "AuthResponse": {
+          "type": "object",
+          "properties": {
+            "accessToken": {
+              "type": "string",
+              "description": "Access token for API requests",
+              "example": "eyJraWQiOiJ..."
+            },
+            "idToken": {
+              "type": "string",
+              "description": "ID token containing user information",
+              "example": "eyJraWQiOiJ..."
+            },
+            "refreshToken": {
+              "type": "string",
+              "description": "Refresh token for obtaining new access tokens",
+              "example": "eyJjdHki..."
+            },
+            "expiresIn": {
+              "type": "integer",
+              "description": "Token expiration time in seconds",
+              "format": "int32",
+              "example": 3600
+            },
+            "tokenType": {
+              "type": "string",
+              "description": "Token type",
+              "example": "Bearer"
+            }
+          },
+          "description": "Authentication response with JWT tokens"
+        },
+        "SubjectListResponse": {
+          "type": "object",
+          "properties": {
+            "subjects": {
+              "type": "array",
+              "description": "List of subjects",
+              "items": {
+                "$ref": "#/components/schemas/SubjectDTO"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "description": "Total number of subjects",
+              "format": "int32",
+              "example": 15
+            }
+          },
+          "description": "Subject list response"
+        },
+        "PostListResponse": {
+          "type": "object",
+          "properties": {
+            "posts": {
+              "type": "array",
+              "description": "List of posts",
+              "items": {
+                "$ref": "#/components/schemas/PostDTO"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "description": "Total number of posts",
+              "format": "int32",
+              "example": 150
+            },
+            "page": {
+              "type": "integer",
+              "description": "Current page number",
+              "format": "int32",
+              "example": 1
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Items per page",
+              "format": "int32",
+              "example": 20
+            }
+          },
+          "description": "Post list response with pagination"
+        },
+        "FileDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "postId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "userId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "userName": {
+              "type": "string"
+            },
+            "fileName": {
+              "type": "string"
+            },
+            "fileType": {
+              "type": "string",
+              "enum": [
+                "PDF",
+                "IMAGE",
+                "ZIP"
+              ]
+            },
+            "fileSize": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "mimeType": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "CommentListResponse": {
+          "type": "object",
+          "properties": {
+            "comments": {
+              "type": "array",
+              "description": "List of comments",
+              "items": {
+                "$ref": "#/components/schemas/CommentDTO"
+              }
+            },
+            "total": {
+              "type": "integer",
+              "description": "Total number of comments",
+              "format": "int32",
+              "example": 150
+            },
+            "page": {
+              "type": "integer",
+              "description": "Current page number",
+              "format": "int32",
+              "example": 1
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Items per page",
+              "format": "int32",
+              "example": 20
+            }
+          },
+          "description": "Paginated list of comments"
+        },
+        "AuthorDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Author UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "name": {
+              "type": "string",
+              "description": "Author name",
+              "example": "Adam Kurek"
+            },
+            "email": {
+              "type": "string",
+              "description": "Author email",
+              "example": "adam@test.com"
+            }
+          },
+          "description": "Author information"
+        },
+        "FileInfoDTO": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "description": "File type",
+              "example": "pdf",
+              "enum": [
+                "pdf",
+                "image",
+                "zip"
+              ]
+            },
+            "url": {
+              "type": "string",
+              "description": "File URL/S3 key",
+              "example": "550e8400_document.pdf"
+            },
+            "size": {
+              "type": "integer",
+              "description": "File size in bytes",
+              "format": "int64",
+              "example": 2048576
+            },
+            "downloadUrl": {
+              "type": "string",
+              "description": "Pre-signed download URL (temporary)",
+              "example": "https://s3.amazonaws.com/..."
+            }
+          },
+          "description": "File information"
+        },
+        "PostDetailDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Post UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "title": {
+              "type": "string",
+              "description": "Post title",
+              "example": "Data Structures Cheat Sheet"
+            },
+            "description": {
+              "type": "string",
+              "description": "Post description",
+              "example": "Complete guide to trees and graphs"
+            },
+            "author": {
+              "$ref": "#/components/schemas/AuthorDTO"
+            },
+            "subject": {
+              "$ref": "#/components/schemas/SubjectInfoDTO"
+            },
+            "file": {
+              "$ref": "#/components/schemas/FileInfoDTO"
+            },
+            "stats": {
+              "$ref": "#/components/schemas/StatsDTO"
+            },
+            "isPublished": {
+              "type": "boolean",
+              "description": "Is post published",
+              "example": true
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time"
+            }
+          },
+          "description": "Detailed post information with nested structure"
+        },
+        "StatsDTO": {
+          "type": "object",
+          "properties": {
+            "likes": {
+              "type": "integer",
+              "description": "Number of likes",
+              "format": "int32",
+              "example": 42
+            },
+            "comments": {
+              "type": "integer",
+              "description": "Number of comments",
+              "format": "int32",
+              "example": 15
+            },
+            "views": {
+              "type": "integer",
+              "description": "Number of views (placeholder for future feature)",
+              "format": "int32",
+              "example": 0
+            }
+          },
+          "description": "Engagement statistics"
+        },
+        "SubjectInfoDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Subject UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "name": {
+              "type": "string",
+              "description": "Subject name",
+              "example": "Computer Science"
+            },
+            "description": {
+              "type": "string",
+              "description": "Subject description",
+              "example": "Algorithms and data structures"
+            }
+          },
+          "description": "Subject information"
+        },
+        "FileDownloadResponse": {
+          "type": "object",
+          "properties": {
+            "fileId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "fileName": {
+              "type": "string"
+            },
+            "downloadUrl": {
+              "type": "string"
+            },
+            "expiresIn": {
+              "type": "string"
+            }
+          }
+        },
+        "CommentDetailDTO": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Comment UUID",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "postId": {
+              "type": "string",
+              "description": "Post ID this comment belongs to",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            },
+            "author": {
+              "$ref": "#/components/schemas/AuthorDTO"
+            },
+            "content": {
+              "type": "string",
+              "description": "Comment content",
+              "example": "Great study material!"
+            },
+            "stats": {
+              "$ref": "#/components/schemas/StatsDTO"
+            },
+            "createdAt": {
+              "type": "string",
+              "description": "Creation timestamp",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "description": "Last update timestamp",
+              "format": "date-time"
+            }
+          },
+          "description": "Detailed comment information with nested structure"
+        }
+      },
+      "securitySchemes": {
+        "Bearer Authentication": {
+          "type": "http",
+          "description": "Enter JWT token from AWS Cognito (without 'Bearer' prefix)",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      }
+    }
+  }
