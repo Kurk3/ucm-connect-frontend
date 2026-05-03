@@ -1,6 +1,6 @@
 # UCM Connect Frontend
 
-**Live:** [ucm-connect.sk](https://ucm-connect.sk) &nbsp;|&nbsp; **API:** [api.ucm-connect.sk](https://api.ucm-connect.sk)
+**Live:** [ucm-connect.sk](https://ucm-connect.sk) &nbsp;|&nbsp; **API:** [api.ucm-connect.sk](https://api.ucm-connect.sk) &nbsp;|&nbsp; **Backend repo:** [ucm-connect-backend](https://github.com/Kurk3/ucm-connect-backend)
 
 Vue 3 SPA for **UCM Connect** — a student community platform built as a bachelor's thesis project at the University of SS. Cyril and Methodius in Trnava (UCM).
 
